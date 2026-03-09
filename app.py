@@ -1,3 +1,10 @@
+"""
+Excel数据统计工具
+版本: 1.1.0
+更新日期: 2026-03-09
+功能: 支持14日和30日统计周期切换的Excel批量数据分析工具
+"""
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -5,10 +12,14 @@ import plotly.graph_objects as go
 from io import BytesIO
 import re
 from typing import List, Dict, Tuple
-import warnings
+导入警告
+
+# 版本信息
+__version__ = "1.1.0"
+__update_date__ = "2026-03-09"
 
 # 性能优化设置
-warnings.filterwarnings('ignore')
+警告。filterwarnings('忽略')
 pd.options.mode.chained_assignment = None
 
 # 页面配置
@@ -112,9 +123,12 @@ def extract_batch_number(filename: str) -> int:
     return 0
 
 
-def process_excel_file(file) -> Dict:
+def process_excel_file(file, days: int = 14) -> Dict:
     """
     处理单个Excel文件，统计所需数据
+    参数:
+        file: Excel文件对象
+        days: 统计天数，14或30
     返回: {"batch": 批次号, "b": 登录数, "c": 消费数, "d": 总金额, "e": 套餐数}
     """
     try:
@@ -146,7 +160,7 @@ def process_excel_file(file) -> Dict:
             }
         
         # 检查必需的列是否存在
-        required_columns = ['14日内是否登录', '14日内是否消费']
+        required_columns = [f'{days}日内是否登录', f'{days}日内是否消费']
         available_columns = list(df.columns)
         missing_columns = [col for col in required_columns if col not in available_columns]
         
@@ -161,28 +175,34 @@ def process_excel_file(file) -> Dict:
                 'missing_columns': missing_columns
             }
         
-        # b列: "14日内是否登录"中值为1的数量
+        # b列: "X日内是否登录"中值为1的数量
         b_count = 0
-        if '14日内是否登录' in df.columns:
+        login_column = f'{days}日内是否登录'
+        if login_column in df.columns:
             try:
                 # 转换为数值类型，处理可能的字符串
-                login_col = pd.to_numeric(df['14日内是否登录'], errors='coerce')
+                login_col = pd.to_numeric(df[login_column], errors='coerce')
                 b_count = int((login_col == 1).sum())
             except Exception as e:
                 pass  # 如果转换失败，保持为0
         
-        # c列: "14日内是否消费"中值为1的数量
+        # c列: "X日内是否消费"中值为1的数量
         c_count = 0
-        if '14日内是否消费' in df.columns:
+        consume_column = f'{days}日内是否消费'
+        if consume_column in df.columns:
             try:
-                consume_col = pd.to_numeric(df['14日内是否消费'], errors='coerce')
+                consume_col = pd.to_numeric(df[consume_column], errors='coerce')
                 c_count = int((consume_col == 1).sum())
             except Exception as e:
                 pass
         
         # d列: 三个消费金额字段求和
         d_sum = 0
-        amount_columns = ['14日内会员消费金额', '14日内声音包消费金额', '14日内通用会员消费金额']
+        amount_columns = [
+            f'{days}日内会员消费金额',
+            f'{days}日内声音包消费金额',
+            f'{days}日内通用会员消费金额'
+        ]
         for col in amount_columns:
             if col in df.columns:
                 try:
@@ -192,11 +212,12 @@ def process_excel_file(file) -> Dict:
                 except Exception as e:
                     pass
         
-        # e列: "14日内购买记录"中特定套餐出现次数
+        # e列: "X日内购买记录"中特定套餐出现次数
         e_count = 0
-        if '14日内购买记录' in df.columns:
+        purchase_column = f'{days}日内购买记录'
+        if purchase_column in df.columns:
             try:
-                purchase_records = df['14日内购买记录'].fillna('').astype(str)
+                purchase_records = df[purchase_column].fillna('').astype(str)
                 e_count = int(purchase_records.str.contains('两年年套餐499元|UNKNOWN499元', regex=True).sum())
             except Exception as e:
                 pass
@@ -330,9 +351,12 @@ def create_visualizations(df: pd.DataFrame):
     st.plotly_chart(fig3, use_container_width=True)
 
 
-def validate_file(file) -> Dict:
+def validate_file(file, days: int = 14) -> Dict:
     """
     预验证文件是否可以正常处理
+    参数:
+        file: Excel文件对象
+        days: 统计天数，14或30
     返回验证结果
     """
     try:
@@ -355,7 +379,7 @@ def validate_file(file) -> Dict:
             }
         
         # 检查必需列
-        required_columns = ['14日内是否登录', '14日内是否消费']
+        required_columns = [f'{days}日内是否登录', f'{days}日内是否消费']
         available_columns = list(df.columns)
         missing = [col for col in required_columns if col not in available_columns]
         
@@ -416,12 +440,23 @@ def main():
     # 侧边栏说明
     with st.sidebar:
         st.markdown('### 📖 使用说明')
-        st.markdown("""
+        
+        # 时间范围选择
+        st.markdown('#### 📅 统计时间范围')
+        time_range = st.radio(
+            "选择统计周期",
+            options=["14日", "30日"],
+            horizontal=True,
+            help="切换统计14日或30日的数据"
+        )
+        days = 14 if time_range == "14日" else 30
+        
+        st.markdown(f"""
         <div class="info-card">
-        <h4>统计规则</h4>
+        <h4>统计规则（{time_range}）</h4>
         <ul>
-            <li><span class="accent-blue">b列</span>: 14日内登录用户数</li>
-            <li><span class="accent-blue">c列</span>: 14日内消费用户数</li>
+            <li><span class="accent-blue">b列</span>: {days}日内登录用户数</li>
+            <li><span class="accent-blue">c列</span>: {days}日内消费用户数</li>
             <li><span class="accent-blue">d列</span>: 三类消费金额总和</li>
             <li><span class="accent-blue">e列</span>: 499元套餐购买次数</li>
         </ul>
@@ -495,13 +530,13 @@ def main():
                     except:
                         pass
                     
-                    # 处理文件，失败则重试一次
-                    result = process_excel_file(file)
+                    # 处理文件，传入天数参数
+                    result = process_excel_file(file, days=days)
                     if result['status'] == 'error':
                         status_text.warning(f'⚠️ 重试: {file.name}')
                         try:
                             file.seek(0)
-                            result = process_excel_file(file)
+                            result = process_excel_file(file, days=days)
                         except:
                             pass
                     
@@ -533,7 +568,7 @@ def main():
                                     if len(err['available_columns']) > 10:
                                         cols_display += f" ... (还有{len(err['available_columns']) - 10}个)"
                                     st.code(cols_display)
-                                st.warning('🔧 **解决方法**: 请检查Excel文件，确保包含"14日内是否登录"和"14日内是否消费"这两列')
+                                st.warning(f'🔧 **解决方法**: 请检查Excel文件，确保包含"{days}日内是否登录"和"{days}日内是否消费"这两列')
                             
                             # 如果是文件读取错误，提供建议
                             elif err.get('error_type') == 'file_read':
@@ -544,7 +579,7 @@ def main():
                                 st.warning('🔧 **解决方法**: 尝试重新保存文件，或使用Excel打开后另存为新文件')
                             
                             # 如果有traceback，显示在代码块中
-                            if 'traceback' in err:
+                            如果错误中包含回溯：
                                 with st.expander('📋 详细错误堆栈（技术信息）'):
                                     st.code(err['traceback'], language='python')
                             
@@ -560,7 +595,7 @@ def main():
                     st.markdown('### 📊 统计结果汇总')
                     st.dataframe(
                         summary_df,
-                        use_container_width=True,
+                        use_container_width=真,
                         height=400
                     )
                     
@@ -570,9 +605,9 @@ def main():
                         st.metric('总登录数', f"{summary_df['b列(登录数)'].sum():,}")
                     with col2:
                         st.metric('总消费数', f"{summary_df['c列(消费数)'].sum():,}")
-                    with col3:
-                        st.metric('总金额', f"¥{summary_df['d列(总金额)'].sum():,.2f}")
-                    with col4:
+                    与col3:
+                        st.metric'总金额', f"¥{summary_df['d列(总金额)'].sum():,.2f}")
+                    与col4:
                         st.metric('总套餐数', f"{summary_df['e列(套餐数)'].sum():,}")
                     
                     st.markdown('---')
@@ -592,7 +627,7 @@ def main():
                         file_name='统计结果.xlsx',
                         mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
                     )
-                else:
+                :
                     st.error('❌ 没有成功处理的文件')
     
     else:
@@ -601,9 +636,9 @@ def main():
     # 页脚
     st.markdown('---')
     st.markdown(
-        '<p style="text-align: center; color: #a78bfa; font-size: 14px;">'
-        'Excel数据统计工具 | Powered by Streamlit'
-        '</p>',
+        f'<p style="text-align: center; color: #a78bfa; font-size: 14px;">'
+        f'Excel数据统计工具 v{__version__} | 更新于 {__update_date__} | Powered by Streamlit'
+        f'</p>',
         unsafe_allow_html=True
     )
 
