@@ -6,14 +6,14 @@ import plotly.graph_objects as go
 from io import BytesIO
 import re
 from typing import List, Dict, Tuple
-导入警告
+import warnings
 
 # 版本信息
 __version__ = "1.1.0"
 __update_date__ = "2026-03-09"
 
 # 性能优化设置
-警告。filterwarnings忽略
+warnings.filterwarnings('ignore')
 pd.options.mode.chained_assignment = None
 
 # 页面配置
@@ -29,54 +29,54 @@ st.markdown("""
 <style>
     /* 主背景 */
     .stApp {
-背景：线性渐变(135度，#f5f3ff 0%，#ffffff 100%);
+        background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 100%);
     }
     
     /* 侧边栏 */
     [data-testid="stSidebar"] {
-背景：线性渐变(180度，#e9d5ff 0%，#f3e8ff 100%);
+        background: linear-gradient(180deg, #e9d5ff 0%, #f3e8ff 100%);
     }
     
     /* 标题样式 */
     h1 {
-颜色: #7c3aed;
-
-文字阴影：2px 2px 4px rgba(124, 58, 237, 0.1);
+        color: #7c3aed;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(124, 58, 237, 0.1);
     }
     
     h2, h3 {
-颜色: #8b5cf6;
+        color: #8b5cf6;
     }
     
     /* 文件上传区域 */
     [data-testid="stFileUploader"] {
-背景: 白色;
-
-圆角: 15像素;
-内边距: 20像素;
+        background: white;
+        border: 2px dashed #c4b5fd;
+        border-radius: 15px;
+        padding: 20px;
     }
     
     /* 按钮样式 */
     .stButton > button {
-背景：线性渐变(135度，#8b5cf6 0%，#6366f1 100%);
-颜色：白色；
-
-圆角：10px；
+        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
         padding: 10px 30px;
-字体粗细：600；
+        font-weight: 600;
         box-shadow: 0 4px 6px rgba(139, 92, 246, 0.3);
-过渡：所有0.3秒，缓动；
+        transition: all 0.3s ease;
     }
     
     .stButton > button:hover {
-变换：沿Y轴向上偏移2像素；
+        transform: translateY(-2px);
         box-shadow: 0 6px 12px rgba(139, 92, 246, 0.4);
     }
     
     /* 数据表格 */
     [data-testid="stDataFrame"] {
-背景: 白色;
-圆角：10px；
+        background: white;
+        border-radius: 10px;
         box-shadow: 0 2px 8px rgba(124, 58, 237, 0.1);
     }
     
