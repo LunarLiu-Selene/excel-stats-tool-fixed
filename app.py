@@ -1,9 +1,3 @@
-"""
-Excel数据统计工具
-版本: 1.1.0
-更新日期: 2026-03-09
-功能: 支持14日和30日统计周期切换的Excel批量数据分析工具
-"""
 
 import streamlit as st
 import pandas as pd
@@ -19,7 +13,7 @@ __version__ = "1.1.0"
 __update_date__ = "2026-03-09"
 
 # 性能优化设置
-警告。filterwarnings('忽略')
+警告。filterwarnings忽略
 pd.options.mode.chained_assignment = None
 
 # 页面配置
@@ -35,54 +29,54 @@ st.markdown("""
 <style>
     /* 主背景 */
     .stApp {
-        background: linear-gradient(135deg, #f5f3ff 0%, #ffffff 100%);
+背景：线性渐变(135度，#f5f3ff 0%，#ffffff 100%);
     }
     
     /* 侧边栏 */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #e9d5ff 0%, #f3e8ff 100%);
+背景：线性渐变(180度，#e9d5ff 0%，#f3e8ff 100%);
     }
     
     /* 标题样式 */
     h1 {
-        color: #7c3aed;
-        font-weight: 700;
-        text-shadow: 2px 2px 4px rgba(124, 58, 237, 0.1);
+颜色: #7c3aed;
+
+文字阴影：2px 2px 4px rgba(124, 58, 237, 0.1);
     }
     
     h2, h3 {
-        color: #8b5cf6;
+颜色: #8b5cf6;
     }
     
     /* 文件上传区域 */
     [data-testid="stFileUploader"] {
-        background: white;
-        border: 2px dashed #c4b5fd;
-        border-radius: 15px;
-        padding: 20px;
+背景: 白色;
+
+圆角: 15像素;
+内边距: 20像素;
     }
     
     /* 按钮样式 */
     .stButton > button {
-        background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
-        color: white;
-        border: none;
-        border-radius: 10px;
+背景：线性渐变(135度，#8b5cf6 0%，#6366f1 100%);
+颜色：白色；
+
+圆角：10px；
         padding: 10px 30px;
-        font-weight: 600;
+字体粗细：600；
         box-shadow: 0 4px 6px rgba(139, 92, 246, 0.3);
-        transition: all 0.3s ease;
+过渡：所有0.3秒，缓动；
     }
     
     .stButton > button:hover {
-        transform: translateY(-2px);
+变换：沿Y轴向上偏移2像素；
         box-shadow: 0 6px 12px rgba(139, 92, 246, 0.4);
     }
     
     /* 数据表格 */
     [data-testid="stDataFrame"] {
-        background: white;
-        border-radius: 10px;
+背景: 白色;
+圆角：10px；
         box-shadow: 0 2px 8px rgba(124, 58, 237, 0.1);
     }
     
@@ -579,7 +573,7 @@ def main():
                                 st.warning('🔧 **解决方法**: 尝试重新保存文件，或使用Excel打开后另存为新文件')
                             
                             # 如果有traceback，显示在代码块中
-                            如果错误中包含回溯：
+                            if 'traceback' in err:
                                 with st.expander('📋 详细错误堆栈（技术信息）'):
                                     st.code(err['traceback'], language='python')
                             
@@ -595,7 +589,7 @@ def main():
                     st.markdown('### 📊 统计结果汇总')
                     st.dataframe(
                         summary_df,
-                        use_container_width=真,
+                        use_container_width=True,
                         height=400
                     )
                     
@@ -605,9 +599,9 @@ def main():
                         st.metric('总登录数', f"{summary_df['b列(登录数)'].sum():,}")
                     with col2:
                         st.metric('总消费数', f"{summary_df['c列(消费数)'].sum():,}")
-                    与col3:
-                        st.metric'总金额', f"¥{summary_df['d列(总金额)'].sum():,.2f}")
-                    与col4:
+                    with col3:
+                        st.metric('总金额', f"¥{summary_df['d列(总金额)'].sum():,.2f}")
+                    with col4:
                         st.metric('总套餐数', f"{summary_df['e列(套餐数)'].sum():,}")
                     
                     st.markdown('---')
@@ -627,7 +621,7 @@ def main():
                         file_name='统计结果.xlsx',
                         mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
                     )
-                :
+                else:
                     st.error('❌ 没有成功处理的文件')
     
     else:
