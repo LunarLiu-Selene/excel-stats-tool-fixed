@@ -32,19 +32,19 @@ ENV/
 *.swo
 *~
 
-# Data files
+# 数据文件
 *.xlsx
 *.xls
 *.csv
 
-# OS
+# 操作系统
 .DS_Store
 Thumbs.db
 
-# Logs
+# 日志
 *.log
 
-# Node.js (if accidentally created)
+# Node.js（如果意外创建）
 node_modules/
 package-lock.json
 yarn.lock
